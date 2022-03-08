@@ -1,0 +1,773 @@
+{
+  "version": "0.0.0",
+  "name": "ido",
+  "instructions": [
+    {
+      "name": "initialize",
+      "accounts": [
+        {
+          "name": "authority",
+          "isMut": false,
+          "isSigner": true
+        },
+        {
+          "name": "idoData",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "systemProgram",
+          "isMut": false,
+          "isSigner": false
+        }
+      ],
+      "args": [
+        {
+          "name": "idoName",
+          "type": "string"
+        },
+        {
+          "name": "tokenSupplyForSale",
+          "type": "u64"
+        },
+        {
+          "name": "startTime",
+          "type": "i64"
+        },
+        {
+          "name": "duration",
+          "type": "i32"
+        },
+        {
+          "name": "rate",
+          "type": "u32"
+        },
+        {
+          "name": "maxStableCoin",
+          "type": "u64"
+        },
+        {
+          "name": "minStableCoin",
+          "type": "u64"
+        },
+        {
+          "name": "stableCoinDecimal",
+          "type": "i32"
+        },
+        {
+          "name": "idoTokenDecimal",
+          "type": "i32"
+        }
+      ]
+    },
+    {
+      "name": "insertAddressWhiteList",
+      "accounts": [
+        {
+          "name": "authority",
+          "isMut": false,
+          "isSigner": true
+        },
+        {
+          "name": "idoData",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "systemProgram",
+          "isMut": false,
+          "isSigner": false
+        }
+      ],
+      "args": [
+        {
+          "name": "address",
+          "type": "publicKey"
+        }
+      ]
+    },
+    {
+      "name": "removeAddressWhiteList",
+      "accounts": [
+        {
+          "name": "authority",
+          "isMut": false,
+          "isSigner": true
+        },
+        {
+          "name": "idoData",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "systemProgram",
+          "isMut": false,
+          "isSigner": false
+        }
+      ],
+      "args": [
+        {
+          "name": "address",
+          "type": "publicKey"
+        }
+      ]
+    },
+    {
+      "name": "insertWithdrawRulesList",
+      "accounts": [
+        {
+          "name": "authority",
+          "isMut": false,
+          "isSigner": true
+        },
+        {
+          "name": "idoData",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "systemProgram",
+          "isMut": false,
+          "isSigner": false
+        }
+      ],
+      "args": [
+        {
+          "name": "rule",
+          "type": "string"
+        }
+      ]
+    },
+    {
+      "name": "removeWithdrawRulesList",
+      "accounts": [
+        {
+          "name": "authority",
+          "isMut": false,
+          "isSigner": true
+        },
+        {
+          "name": "idoData",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "systemProgram",
+          "isMut": false,
+          "isSigner": false
+        }
+      ],
+      "args": [
+        {
+          "name": "rule",
+          "type": "string"
+        }
+      ]
+    },
+    {
+      "name": "initializePool",
+      "accounts": [
+        {
+          "name": "idoAuthority",
+          "isMut": true,
+          "isSigner": true
+        },
+        {
+          "name": "idoAuthorityIdoToken",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "idoAccount",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "stableCoinMint",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "idoTokenMint",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "poolIdoToken",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "poolStableCoin",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "systemProgram",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "tokenProgram",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "rent",
+          "isMut": false,
+          "isSigner": false
+        }
+      ],
+      "args": [
+        {
+          "name": "idoName",
+          "type": "string"
+        },
+        {
+          "name": "tokenSupplyForSale",
+          "type": "u64"
+        },
+        {
+          "name": "startTime",
+          "type": "i64"
+        },
+        {
+          "name": "duration",
+          "type": "i32"
+        },
+        {
+          "name": "rate",
+          "type": "u32"
+        },
+        {
+          "name": "maxStableCoin",
+          "type": "u64"
+        },
+        {
+          "name": "minStableCoin",
+          "type": "u64"
+        },
+        {
+          "name": "bumps",
+          "type": {
+            "defined": "PoolBumps"
+          }
+        },
+        {
+          "name": "stableCoinDecimal",
+          "type": "i32"
+        },
+        {
+          "name": "idoTokenDecimal",
+          "type": "i32"
+        },
+        {
+          "name": "rateDecimal",
+          "type": "i32"
+        }
+      ]
+    },
+    {
+      "name": "updateWithdrawRefundPeriod",
+      "accounts": [
+        {
+          "name": "authority",
+          "isMut": false,
+          "isSigner": true
+        },
+        {
+          "name": "idoData",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "systemProgram",
+          "isMut": false,
+          "isSigner": false
+        }
+      ],
+      "args": [
+        {
+          "name": "withdraw",
+          "type": "bool"
+        },
+        {
+          "name": "refund",
+          "type": "bool"
+        }
+      ]
+    },
+    {
+      "name": "exchangeStableCoinForIdoToken",
+      "accounts": [
+        {
+          "name": "userAuthority",
+          "isMut": false,
+          "isSigner": true
+        },
+        {
+          "name": "userStableCoin",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "userVault",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "idoAccount",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "poolStableCoin",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "idoTokenPool",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "systemProgram",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "tokenProgram",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "rent",
+          "isMut": false,
+          "isSigner": false
+        }
+      ],
+      "args": [
+        {
+          "name": "amountStableCoin",
+          "type": "u64"
+        },
+        {
+          "name": "amountIdoToken",
+          "type": "u64"
+        }
+      ]
+    },
+    {
+      "name": "exchangeIdoTokenForStableCoin",
+      "accounts": [
+        {
+          "name": "userAuthority",
+          "isMut": false,
+          "isSigner": true
+        },
+        {
+          "name": "userStableCoin",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "userVault",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "idoAccount",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "poolStableCoin",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "idoTokenPool",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "systemProgram",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "tokenProgram",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "rent",
+          "isMut": false,
+          "isSigner": false
+        }
+      ],
+      "args": [
+        {
+          "name": "amountStableCoin",
+          "type": "u64"
+        },
+        {
+          "name": "amountIdoToken",
+          "type": "u64"
+        }
+      ]
+    },
+    {
+      "name": "withdrawFromStableCoinPool",
+      "accounts": [
+        {
+          "name": "userAuthority",
+          "isMut": false,
+          "isSigner": true
+        },
+        {
+          "name": "withdrawAccount",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "idoAccount",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "poolStableCoin",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "systemProgram",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "tokenProgram",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "rent",
+          "isMut": false,
+          "isSigner": false
+        }
+      ],
+      "args": []
+    },
+    {
+      "name": "withdrawFromIdoTokenVault",
+      "accounts": [
+        {
+          "name": "userAuthority",
+          "isMut": false,
+          "isSigner": true
+        },
+        {
+          "name": "withdrawAccount",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "idoAccount",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "vaultIdoToken",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "systemProgram",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "tokenProgram",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "rent",
+          "isMut": false,
+          "isSigner": false
+        }
+      ],
+      "args": [
+        {
+          "name": "rule",
+          "type": "string"
+        }
+      ]
+    }
+  ],
+  "accounts": [
+    {
+      "name": "IdoData",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "idoAuthority",
+            "type": "publicKey"
+          },
+          {
+            "name": "idoName",
+            "type": {
+              "array": [
+                "u8",
+                30
+              ]
+            }
+          },
+          {
+            "name": "tokenSupplyForSale",
+            "type": "u64"
+          },
+          {
+            "name": "startTime",
+            "type": "i64"
+          },
+          {
+            "name": "duration",
+            "type": "i32"
+          },
+          {
+            "name": "rate",
+            "type": "u32"
+          },
+          {
+            "name": "rateDecimal",
+            "type": "i32"
+          },
+          {
+            "name": "maxStableCoin",
+            "type": "u64"
+          },
+          {
+            "name": "minStableCoin",
+            "type": "u64"
+          },
+          {
+            "name": "stableCoinDecimal",
+            "type": "i32"
+          },
+          {
+            "name": "idoTokenDecimal",
+            "type": "i32"
+          },
+          {
+            "name": "withdrawPeriod",
+            "type": "bool"
+          },
+          {
+            "name": "refundPeriod",
+            "type": "bool"
+          },
+          {
+            "name": "addresses",
+            "type": {
+              "vec": "publicKey"
+            }
+          },
+          {
+            "name": "withdrawRules",
+            "type": {
+              "vec": "string"
+            }
+          },
+          {
+            "name": "bumps",
+            "type": {
+              "defined": "PoolBumps"
+            }
+          },
+          {
+            "name": "stableCoinMint",
+            "type": "publicKey"
+          },
+          {
+            "name": "idoTokenMint",
+            "type": "publicKey"
+          },
+          {
+            "name": "poolStableCoin",
+            "type": "publicKey"
+          },
+          {
+            "name": "poolIdoToken",
+            "type": "publicKey"
+          },
+          {
+            "name": "userVaultAccountInfo",
+            "type": {
+              "vec": {
+                "defined": "UserVaultAccountInfo"
+              }
+            }
+          }
+        ]
+      }
+    }
+  ],
+  "types": [
+    {
+      "name": "UserVaultAccountInfo",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "idoAuthority",
+            "type": "publicKey"
+          },
+          {
+            "name": "userStableCoinAccount",
+            "type": "publicKey"
+          },
+          {
+            "name": "userVaultAccount",
+            "type": "publicKey"
+          },
+          {
+            "name": "totalTokenBought",
+            "type": "u64"
+          },
+          {
+            "name": "claimed",
+            "type": "bool"
+          },
+          {
+            "name": "rulesClaimed",
+            "type": {
+              "vec": "string"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "name": "PoolBumps",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "idoAccount",
+            "type": "u8"
+          },
+          {
+            "name": "poolIdoToken",
+            "type": "u8"
+          },
+          {
+            "name": "poolStableCoin",
+            "type": "u8"
+          }
+        ]
+      }
+    }
+  ],
+  "errors": [
+    {
+      "code": 300,
+      "name": "IdoNotOver",
+      "msg": "IDO has not finished yet"
+    },
+    {
+      "code": 301,
+      "name": "IdoNotOpen",
+      "msg": "IDO has not started yet"
+    },
+    {
+      "code": 302,
+      "name": "LowIdoStableCoin",
+      "msg": "Insufficient Stable Coin"
+    },
+    {
+      "code": 303,
+      "name": "LowIdoToken",
+      "msg": "Insufficient Ido Tokens"
+    },
+    {
+      "code": 304,
+      "name": "InvalidWhiteListEntry",
+      "msg": "Duplicated or not found entry on white list"
+    },
+    {
+      "code": 305,
+      "name": "InvalidWithdrawRuleEntry",
+      "msg": "Duplicated or not found entry on withdraw rules"
+    },
+    {
+      "code": 306,
+      "name": "InvalidWhiteListEntryMinValue",
+      "msg": "Can't add because will not get min tokens || whitelist full"
+    },
+    {
+      "code": 307,
+      "name": "PoolEmpty",
+      "msg": "Stable Coin Pool is Empty"
+    },
+    {
+      "code": 308,
+      "name": "VaultEmpty",
+      "msg": "Vault is Empty"
+    },
+    {
+      "code": 309,
+      "name": "NotOnWhitelist",
+      "msg": "User is not on whitelist"
+    },
+    {
+      "code": 310,
+      "name": "WithdrawAndRefundCannotBeTrue",
+      "msg": "Flags withdraw and refund period cannot be true"
+    },
+    {
+      "code": 311,
+      "name": "WithdrawAlreadyOnGoing",
+      "msg": "Cannot refund an ido that withdraw period already started"
+    },
+    {
+      "code": 312,
+      "name": "RefundAlreadyOnGoing",
+      "msg": "Cannot withdraw an ido that refund period already started"
+    },
+    {
+      "code": 313,
+      "name": "RefundNotAvailable",
+      "msg": "Refund not available for this ido"
+    },
+    {
+      "code": 314,
+      "name": "WithdrawNotAvailable",
+      "msg": "Withdraw not available for this ido"
+    },
+    {
+      "code": 315,
+      "name": "BuyAmountSurpassTheMax",
+      "msg": "Buy amount surpass the max limit"
+    },
+    {
+      "code": 316,
+      "name": "SoldOut",
+      "msg": "All tokens where sold"
+    },
+    {
+      "code": 317,
+      "name": "RuleNotFound",
+      "msg": "Withdraw rule not found"
+    },
+    {
+      "code": 318,
+      "name": "MonthClaimed",
+      "msg": "Month already claimed"
+    }
+  ],
+  "metadata": {
+    "address": "HWfYZctiVr5F1Fy6YwzHWSXH45SQXBopTcUVkzQES98L"
+  }
+}

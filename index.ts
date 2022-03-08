@@ -1,6 +1,6 @@
 
 // Import * as anchor not working...
-const anchor = require("@project-seBrum/anchor");
+const anchor = require("@project-serum/anchor");
 
 import { Provider, Program, web3 } from "@project-serum/anchor";
 import { readFileSync } from "fs";
@@ -123,7 +123,7 @@ async function initializeIdoPool(program: Program, provider: Provider) {
 }
 (async () => {
     const args = minimist(process.argv.slice(2));
-    const secret = JSON.parse(readFileSync(args.keypair, 'utf-8'));
+    const secret = JSON.parse(readFileSync(args.address, 'utf-8'));
     const walletKeypair = web3.Keypair.fromSecretKey(
         Uint8Array.from(secret)
     );
