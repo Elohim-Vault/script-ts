@@ -2,10 +2,22 @@
 // Import * as anchor not working...
 const anchor = require("@project-serum/anchor");
 
-import { Provider, Program, web3 } from "@project-serum/anchor";
+import { Provider, Program, web3, BN } from "@project-serum/anchor";
 import { readFileSync, writeFile } from "fs";
 import * as spl from "@solana/spl-token";
 
+type initializeIdoPoolParams = {
+    idoName: string;
+    tokenSupplyForSale: BN;
+    startTime: BN;
+    duration: number;
+    rate: number;
+    maxStableCoin: BN;
+    minStableCoin: BN;
+    stableCoinDecimal: number;
+    idoTokenDecimal: number;
+    rateDecimal: number;
+}
 
 async function createMint(provider: any, authority: web3.PublicKey): Promise<spl.Token> {
     if (authority === undefined) {
@@ -40,20 +52,7 @@ function getProvider(keypair: web3.Keypair): Provider {
     return new anchor.Provider(connection, walletWrapper, opts);
 }
 
-async function initializeIdoPool(program: Program, provider: Provider) {
-    const idoName = "ido";
-    const tokenSupplyForSale = new anchor.BN(1000);
-    const nowBn = new anchor.BN(Date.now() / 1000);
-    const startTime = nowBn.add(new anchor.BN(5));
-    const duration = 10;
-    const rate = 0;
-    const maxStableCoin = nowBn.add(new anchor.BN(5));
-    const minStableCoin = nowBn.add(new anchor.BN(15));
-
-    const stableCoinDecimal = 4;
-    const idoTokenDecimal = 4;
-    const rateDecimal = 25;
-
+async function initializeIdoPool(program: Program, provider: Provider, params: initializeIdoPoolParams) {
     const idoTokenMint = (await createMint(
         provider,
         provider.wallet.publicKey
@@ -71,17 +70,17 @@ async function initializeIdoPool(program: Program, provider: Provider) {
     );
 
     const [idoAccount, idoAccountBump] = await web3.PublicKey.findProgramAddress(
-        [Buffer.from(idoName)],
+        [Buffer.from(params.idoName)],
         program.programId
     );
 
     const [poolIdoToken, poolIdoTokenBump] = await web3.PublicKey.findProgramAddress(
-        [Buffer.from(idoName), Buffer.from("pool_ido_token")],
+        [Buffer.from(params.idoName), Buffer.from("pool_ido_token")],
         program.programId
     );
 
     const [poolStableCoin, poolStableCoinBump] = await web3.PublicKey.findProgramAddress(
-        [Buffer.from(idoName), Buffer.from("pool_stable_coin")],
+        [Buffer.from(params.idoName), Buffer.from("pool_stable_coin")],
         program.programId
     );
 
@@ -104,19 +103,19 @@ async function initializeIdoPool(program: Program, provider: Provider) {
         rent: anchor.web3.SYSVAR_RENT_PUBKEY.toString()
     }
 
-    logAccounts(accounts, idoName);
+    logAccounts(accounts, params.idoName);
     await program.rpc.initializePool(
-        idoName,
-        tokenSupplyForSale,
-        startTime,
-        duration,
-        rate,
-        maxStableCoin,
-        minStableCoin,
+        params.idoName,
+        params.tokenSupplyForSale,
+        params.startTime,
+        params.duration,
+        params.rate,
+        params.maxStableCoin,
+        params.minStableCoin,
         bumps,
-        stableCoinDecimal,
-        idoTokenDecimal,
-        rateDecimal,
+        params.stableCoinDecimal,
+        params.idoTokenDecimal,
+        params.rateDecimal,
         {
             accounts: {
                 idoAuthority: provider.wallet.publicKey,
@@ -136,7 +135,7 @@ async function initializeIdoPool(program: Program, provider: Provider) {
 }
 
 function logAccounts(accounts: Object, idoName: string) {
-    writeFile(`/logs/${idoName}-log.json`, JSON.stringify(accounts), (err) => {
+    writeFile(`${idoName}-log.json`, JSON.stringify(accounts), (err) => {
         if (err) {
             throw err;
         }
@@ -154,5 +153,18 @@ function logAccounts(accounts: Object, idoName: string) {
     const idl = JSON.parse(readFileSync("idl.json", "utf8"));
     const programId = new web3.PublicKey(idl.metadata.address)
     const program = new anchor.Program(idl, programId);
-    initializeIdoPool(program, provider)
+    const nowBn = new anchor.BN(Date.now() / 1000);
+    const params = {
+        idoName: "ido",
+        tokenSupplyForSale: new anchor.BN(1000),
+        startTime: nowBn.add(new anchor.BN(5)),
+        duration: 10,
+        rate: 0,
+        maxStableCoin: nowBn.add(new anchor.BN(5)),
+        minStableCoin: nowBn.add(new anchor.BN(15)),
+        stableCoinDecimal: 4,
+        idoTokenDecimal: 4,
+        rateDecimal: 25,
+    }
+    initializeIdoPool(program, provider, params);
 })()
