@@ -3,7 +3,7 @@
 const anchor = require("@project-serum/anchor");
 
 import { Provider, Program, web3 } from "@project-serum/anchor";
-import { readFileSync } from "fs";
+import { readFileSync, writeFile } from "fs";
 import * as spl from "@solana/spl-token";
 
 
@@ -68,8 +68,7 @@ async function initializeIdoPool(program: Program, provider: Provider) {
         provider,
         idoTokenMint,
         provider.wallet.publicKey
-        );
-        console.log(idoAuthorityIdoToken.toString())
+    );
 
     const [idoAccount, idoAccountBump] = await web3.PublicKey.findProgramAddress(
         [Buffer.from(idoName)],
@@ -92,6 +91,20 @@ async function initializeIdoPool(program: Program, provider: Provider) {
         poolStableCoinBump
     };
 
+    const accounts = {
+        idoAuthority: provider.wallet.publicKey.toString(),
+        idoAuthorityIdoToken: idoAuthorityIdoToken.toString(),
+        idoAccount: idoAccount.toString(),
+        stableCoinMint: stableCoinMint.toString(),
+        idoTokenMint: idoTokenMint.toString(),
+        poolIdoToken: poolIdoToken.toString(),
+        poolStableCoin: poolStableCoin.toString(),
+        systemProgram: anchor.web3.SystemProgram.programId.toString(),
+        tokenProgram: spl.TOKEN_PROGRAM_ID.toString(),
+        rent: anchor.web3.SYSVAR_RENT_PUBKEY.toString()
+    }
+
+    logAccounts(accounts, idoName);
     await program.rpc.initializePool(
         idoName,
         tokenSupplyForSale,
@@ -121,6 +134,16 @@ async function initializeIdoPool(program: Program, provider: Provider) {
     );
 
 }
+
+function logAccounts(accounts: Object, idoName: string) {
+    writeFile(`/logs/${idoName}-log.json`, JSON.stringify(accounts), (err) => {
+        if (err) {
+            throw err;
+        }
+        return true;
+    });
+}
+
 (async () => {
     const secret = JSON.parse(readFileSync('/home/jeronimo/config/solana/devnet-test.json', 'utf-8'));
     const walletKeypair = web3.Keypair.fromSecretKey(
@@ -128,7 +151,7 @@ async function initializeIdoPool(program: Program, provider: Provider) {
     );
     const provider = getProvider(walletKeypair)
     anchor.setProvider(provider);
-    const idl = JSON.parse(readFileSync("ido.json", "utf8"));
+    const idl = JSON.parse(readFileSync("idl.json", "utf8"));
     const programId = new web3.PublicKey(idl.metadata.address)
     const program = new anchor.Program(idl, programId);
     initializeIdoPool(program, provider)
