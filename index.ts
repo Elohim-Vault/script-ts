@@ -6,12 +6,6 @@ import { Provider, Program, web3, BN } from "@project-serum/anchor";
 import { readFileSync, writeFile } from "fs";
 import * as spl from "@solana/spl-token";
 
-type initializeIdoPoolAccounts = {
-    idoAuthority: web3.PublicKey,
-    idoAuthorityIdoToken: web3.PublicKey,
-    stableCoinMint: web3.PublicKey,
-    idoTokenMint: web3.PublicKey,
-}
 
 type initializeIdoPoolParams = {
     idoName: string;
@@ -24,10 +18,9 @@ type initializeIdoPoolParams = {
     stableCoinDecimal: number;
     idoTokenDecimal: number;
     rateDecimal: number;
-    accounts: initializeIdoPoolAccounts;
 }
 
-async function createMint(provider: any, authority: web3.PublicKey): Promise<spl.Token> {
+async function createMint(provider: any, authority: web3.PublicKey, decimals: number): Promise<spl.Token> {
     if (authority === undefined) {
         authority = provider.wallet.publicKey;
     }
@@ -36,7 +29,7 @@ async function createMint(provider: any, authority: web3.PublicKey): Promise<spl
         provider.wallet.payer,
         authority,
         null,
-        6,
+        decimals,
         spl.TOKEN_PROGRAM_ID
     );
     return mint;
@@ -62,8 +55,25 @@ function logAccounts(accounts: Object, idoName: string) {
     });
 }
 
+async function initializeIdoPool(program: Program, provider: Provider, params: initializeIdoPoolParams) {
+    const idoTokenMint = (await createMint(
+        provider,
+        provider.wallet.publicKey,
+        params.idoTokenDecimal
+    )).publicKey
 
-async function initializeIdoPool(program: Program, params: initializeIdoPoolParams) {
+    const stableCoinMint = (await createMint(
+        provider,
+        provider.wallet.publicKey,
+        params.stableCoinDecimal
+    )).publicKey;
+
+    const idoAuthorityIdoToken = await createTokenAccount(
+        provider,
+        idoTokenMint,
+        provider.wallet.publicKey
+    );
+
     const [idoAccount, idoAccountBump] = await web3.PublicKey.findProgramAddress(
         [Buffer.from(params.idoName)],
         program.programId
@@ -86,11 +96,11 @@ async function initializeIdoPool(program: Program, params: initializeIdoPoolPara
     };
 
     const accounts = {
-        idoAuthority: params.accounts.idoAuthority.toString(),
-        idoAuthorityIdoToken: params.accounts.idoAuthorityIdoToken.toString(),
+        idoAuthority: provider.wallet.publicKey,
+        idoAuthorityIdoToken: idoAuthorityIdoToken.toString(),
         idoAccount: idoAccount.toString(),
-        stableCoinMint: params.accounts.stableCoinMint.toString(),
-        idoTokenMint: params.accounts.idoTokenMint.toString(),
+        stableCoinMint: stableCoinMint.toString(),
+        idoTokenMint: idoTokenMint.toString(),
         poolIdoToken: poolIdoToken.toString(),
         poolStableCoin: poolStableCoin.toString(),
         systemProgram: anchor.web3.SystemProgram.programId,
@@ -113,11 +123,11 @@ async function initializeIdoPool(program: Program, params: initializeIdoPoolPara
         params.rateDecimal,
         {
             accounts: {
-                idoAuthority: params.accounts.idoAuthority,
-                idoAuthorityIdoToken: params.accounts.idoAuthorityIdoToken,
+                idoAuthority: provider.wallet.publicKey,
+                idoAuthorityIdoToken: idoAuthorityIdoToken,
                 idoAccount,
-                stableCoinMint: params.accounts.stableCoinMint,
-                idoTokenMint: params.accounts.idoTokenMint,
+                stableCoinMint: stableCoinMint,
+                idoTokenMint: idoTokenMint,
                 poolIdoToken,
                 poolStableCoin,
                 systemProgram: anchor.web3.SystemProgram.programId,
@@ -126,7 +136,6 @@ async function initializeIdoPool(program: Program, params: initializeIdoPoolPara
             }
         }
     );
-
 }
 
 // Client
@@ -138,7 +147,7 @@ function getProvider(keypair: web3.Keypair): Provider {
 }
 
 (async () => {
-    const secret = JSON.parse(readFileSync('/home/jeronimo/config/solana/devnet-test.json', 'utf-8'));
+    const secret = JSON.parse(readFileSync('/home/jeronimo/.config/solana/alternative.json', 'utf-8'));
     const walletKeypair = web3.Keypair.fromSecretKey(
         Uint8Array.from(secret)
     );
@@ -149,21 +158,6 @@ function getProvider(keypair: web3.Keypair): Provider {
     const program = new anchor.Program(idl, programId);
     const nowBn = new anchor.BN(Date.now() / 1000);
 
-    const idoTokenMint = (await createMint(
-        provider,
-        provider.wallet.publicKey
-    )).publicKey
-
-    const stableCoinMint = (await createMint(
-        provider,
-        provider.wallet.publicKey
-    )).publicKey;
-
-    const idoAuthorityIdoToken = await createTokenAccount(
-        provider,
-        idoTokenMint,
-        provider.wallet.publicKey
-    );
     const params = {
         idoName: "ido",
         tokenSupplyForSale: new anchor.BN(1000),
@@ -175,13 +169,7 @@ function getProvider(keypair: web3.Keypair): Provider {
         stableCoinDecimal: 4,
         idoTokenDecimal: 4,
         rateDecimal: 25,
-        accounts: {
-            idoAuthority: provider.wallet.publicKey,
-            idoAuthorityIdoToken: idoAuthorityIdoToken,
-            stableCoinMint: stableCoinMint,
-            idoTokenMint: idoTokenMint,
-        }
     }
-    initializeIdoPool(program, params);
+    initializeIdoPool(program, provider, params);
 })()
 
